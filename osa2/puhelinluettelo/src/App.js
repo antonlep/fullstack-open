@@ -110,6 +110,9 @@ const App = () => {
             setStatusMessage(null)
           }, 5000)
         })
+        .catch(error => {
+          setStatusMessage(error.response.data.error)
+        })
     } else {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         const oldPerson = persons.find(element => element.name === newName)
@@ -128,13 +131,10 @@ const App = () => {
           })
           .catch(error => {
             const deletedPerson = persons.find(element => element.name === newName)
-            setStatusMessage(
-              `'${newName.name}' was already removed from server`
-            )
+            setStatusMessage(error.response.data.error)
             setTimeout(() => {
               setStatusMessage(null)
             }, 5000)
-            setPersons(persons.filter(n => n.id !== deletedPerson.id))
           })
       }
     }
