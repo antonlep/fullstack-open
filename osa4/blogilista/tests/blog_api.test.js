@@ -3,6 +3,7 @@ const supertest = require('supertest')
 const app = require('../app')
 const api = supertest(app)
 const Blog = require('../models/blog')
+const User = require('../models/user')
 
 const initialBlogs = [
     {
@@ -25,9 +26,22 @@ const initialBlogs = [
     }
 ]
 
+let token = ''
+
 beforeEach(async () => {
     await Blog.deleteMany({})
     await Blog.insertMany(initialBlogs)
+    await User.deleteMany({})
+    await api
+        .post('/api/users')
+        .send({ username: 'aaa', password: 'www' })
+
+    const res = await api
+        .post('/api/login')
+        .send({ username: 'aaa', password: 'www' })
+        .expect(200)
+
+    token = 'bearer ' + res.body.token
 })
 
 describe('when there are initial blogs', () => {
@@ -74,6 +88,7 @@ describe('addition of a new blog', () => {
 
         await api
             .post('/api/blogs')
+            .set({ Authorization: token })
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -88,6 +103,25 @@ describe('addition of a new blog', () => {
         expect(author).toContain('erty')
     })
 
+    test('fails with 401 if token not included', async () => {
+        const newBlog = {
+            title: 'wert',
+            author: 'erty',
+            url: 'rtyu',
+            likes: 9
+        }
+
+        await api
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(401)
+
+
+        const blogsAtEnd = await Blog.find({})
+
+        expect(blogsAtEnd).toHaveLength(initialBlogs.length)
+    })
+
     test('fails with 400 if content is not added', async () => {
         const newBlog = {
             author: 'wert'
@@ -95,6 +129,7 @@ describe('addition of a new blog', () => {
 
         await api
             .post('/api/blogs')
+            .set({ Authorization: token })
             .send(newBlog)
             .expect(400)
 
@@ -113,6 +148,7 @@ describe('addition of a new blog', () => {
 
         await api
             .post('/api/blogs')
+            .set({ Authorization: token })
             .send(newBlog)
             .expect(201)
             .expect('Content-Type', /application\/json/)
@@ -128,17 +164,31 @@ describe('addition of a new blog', () => {
 
 describe('deleting a blog', () => {
     test('succeeds with 204 if id is valid', async () => {
-        const blogsAtStart = await Blog.find({})
-        const blogToDelete = blogsAtStart[0]
+        const newBlog = {
+            title: 'wert',
+            author: 'erty',
+            url: 'rtyu',
+            likes: 9
+        }
+
+        await api
+            .post('/api/blogs')
+            .set({ Authorization: token })
+            .send(newBlog)
+            .expect(201)
+            .expect('Content-Type', /application\/json/)
+
+        const blogToDelete = await Blog.findOne({ title: 'wert' })
 
         await api
             .delete(`/api/blogs/${blogToDelete.id}`)
+            .set({ Authorization: token })
             .expect(204)
 
         const blogsAtEnd = await Blog.find({})
 
         expect(blogsAtEnd).toHaveLength(
-            initialBlogs.length - 1
+            initialBlogs.length
         )
 
         const titles = blogsAtEnd.map(r => r.title)
@@ -161,6 +211,7 @@ describe('updating a blog', () => {
 
         await api
             .put(`/api/blogs/${blogToUpdate.id}`)
+            .set({ Authorization: token })
             .send(newBlog)
             .expect(200)
 
