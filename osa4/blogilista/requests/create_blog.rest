@@ -1,10 +1,10 @@
 POST http://localhost:3003/api/blogs
 Content-Type: application/json
-Authorization: bearer fyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Imdvb2dsZTMiLCJpZCI6IjYyZjc3Y2Y2NTYyMTJiMDUzZDcxZTQ5NSIsImlhdCI6MTY2MDM5NTAxMCwiZXhwIjoxNjYwMzk4NjEwfQ.OHApo2CK0khJVB2dzASCXpteHqpbD2XBOqg3wOhSlPs
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFhYSIsImlkIjoiNjJmODliYzRjYmI1OTY4Yzk3NmRiM2RiIiwiaWF0IjoxNjYwNDYyOTk0LCJleHAiOjE2NjA0NjY1OTR9.wK0Q9BXQN3zH-ICzYQGObXTQLWCvju6Xo_w3ijPCE_c
 
 {
     "title": "goo3gl3e2224",
     "author": "G323224",
     "url": "www3.googl324e.fi",
-    "likes": 1
+    "likes": 111
 }
