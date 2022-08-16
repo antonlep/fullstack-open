@@ -76,6 +76,22 @@ const App = () => {
     }
   }
 
+  const updateLikes = async (blogObject) => {
+    try {
+      const returnedBlog = await blogService.like(blogObject)
+      const id = returnedBlog.id
+      setBlogs(blogs.map(blog => blog.id !== id ? blog : returnedBlog))
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    } catch (exception) {
+      setErrorMessage(exception.response.data.error)
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
+
   const blogFormRef = useRef()
 
   if (user === null) {
@@ -95,9 +111,13 @@ const App = () => {
       <Togglable buttonLabel='new note' ref={blogFormRef}>
         <BlogForm createBlog={createBlog} setBlogs={setBlogs} />
       </Togglable>
-      {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
-      )}
+      {blogs
+        .sort((a, b) => b.likes - a.likes)
+        .map(blog =>
+          <div key={blog.id}>
+            <Blog blog={blog} handleLikes={() => updateLikes(blog)} />
+          </div>
+        )}
     </div>
   )
 }
