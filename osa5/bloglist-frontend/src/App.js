@@ -76,6 +76,24 @@ const App = () => {
     }
   }
 
+  const deleteBlog = async (blogObject) => {
+    if (window.confirm(`Remove blog ${blogObject.title} by ${blogObject.author}?`)) {
+      try {
+        await blogService.remove(blogObject)
+        setBlogs(blogs.filter(blog => blog.id !== blogObject.id))
+        setErrorMessage(`blog ${blogObject.title} by ${blogObject.author} deleted`)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      } catch (exception) {
+        setErrorMessage(exception.response.data.error)
+        setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
+      }
+    }
+  }
+
   const updateLikes = async (blogObject) => {
     try {
       const returnedBlog = await blogService.like(blogObject)
@@ -109,13 +127,13 @@ const App = () => {
       <h2>blogs</h2>
       {user.name} logged in<button onClick={handleLogout}>logout</button>
       <Togglable buttonLabel='new note' ref={blogFormRef}>
-        <BlogForm createBlog={createBlog} setBlogs={setBlogs} />
+        <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs
         .sort((a, b) => b.likes - a.likes)
         .map(blog =>
           <div key={blog.id}>
-            <Blog blog={blog} handleLikes={() => updateLikes(blog)} />
+            <Blog blog={blog} handleLikes={() => updateLikes(blog)} deleteBlog={deleteBlog} isUser={user.id === blog.user.id} />
           </div>
         )}
     </div>
