@@ -126,13 +126,13 @@ const App = () => {
       <Notification message={errorMessage} />
       <h2>blogs</h2>
       {user.name} logged in<button onClick={handleLogout}>logout</button>
-      <Togglable buttonLabel='new note' ref={blogFormRef}>
+      <Togglable buttonLabel='new blog' ref={blogFormRef}>
         <BlogForm createBlog={createBlog} />
       </Togglable>
       {blogs
         .sort((a, b) => b.likes - a.likes)
         .map(blog =>
-          <div key={blog.id}>
+          <div key={blog.id} className='blog'>
             <Blog blog={blog} handleLikes={() => updateLikes(blog)} deleteBlog={deleteBlog} isUser={user.id === blog.user.id} />
           </div>
         )}
