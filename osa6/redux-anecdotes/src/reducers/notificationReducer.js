@@ -18,7 +18,7 @@ let timeId = null
 export const setNotification = (message, time) => {
     return dispatch => {
         dispatch(createNotification(message))
-        if (timeId) {
+        if (timeId !== null) {
             clearTimeout(timeId)
         }
         timeId = setTimeout(() => {
