@@ -8,13 +8,9 @@ const AnecdoteList = (props) => {
     const anecdotes = initialAnecdotes.filter(element => element.content.toUpperCase().includes(filter.toUpperCase()))
     anecdotes.sort((a, b) => b.votes - a.votes)
     const dispatch = useDispatch()
-    const notification = useSelector(state => state.notification)
 
     const vote = (anecdote) => {
         dispatch(createVote(anecdote.id))
-        if (notification) {
-            clearTimeout(notification.id)
-        }
         dispatch(setNotification(`you voted '${anecdote.content}'`, 5))
     }
 

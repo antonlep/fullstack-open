@@ -9,7 +9,6 @@ const AnecdoteForm = (props) => {
         const content = event.target.anec.value
         event.target.anec.value = ''
         props.createAnecdote(content)
-        clearTimeout(props.notification.id)
         props.setNotification(`you added '${content}'`, 5)
     }
 
@@ -29,13 +28,8 @@ const mapDispatchToProps = {
     setNotification
 }
 
-const mapStateToProps = (state) => {
-    return {
-        notification: state.notification
-    }
-}
 
 export default connect(
-    mapStateToProps,
+    null,
     mapDispatchToProps
 )(AnecdoteForm)
