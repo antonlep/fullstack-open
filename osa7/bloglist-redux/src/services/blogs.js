@@ -3,16 +3,17 @@ const baseUrl = '/api/blogs'
 
 let token = null
 
-const setToken = newToken => {
+const setToken = (newToken) => {
   token = `bearer ${newToken}`
 }
 
-const getAll = () => {
+const getAll = async () => {
   const request = axios.get(baseUrl)
-  return request.then(response => response.data)
+  const response = await request
+  return response.data
 }
 
-const create = async blogObject => {
+const create = async (blogObject) => {
   const config = {
     headers: { Authorization: token },
   }
@@ -20,29 +21,32 @@ const create = async blogObject => {
   return response.data
 }
 
-const like = async blogObject => {
+const like = async (blogObject) => {
   const updatedBlog = {
     title: blogObject.title,
     author: blogObject.author,
     url: blogObject.url,
     likes: blogObject.likes + 1,
-    user: blogObject.user.id
+    user: blogObject.user.id,
   }
 
   const config = {
     headers: { Authorization: token },
   }
-  const response = await axios.put(baseUrl + '/' + blogObject.id, updatedBlog, config)
+  const response = await axios.put(
+    baseUrl + '/' + blogObject.id,
+    updatedBlog,
+    config
+  )
   return response.data
 }
 
-const remove = async blogObject => {
-
+const remove = async (blogObject) => {
   const config = {
     headers: { Authorization: token },
   }
-  const response = await axios.delete(baseUrl + '/' + blogObject.id, config)
-  return response.data
+  await axios.delete(baseUrl + '/' + blogObject.id, config)
+  return blogObject
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export
