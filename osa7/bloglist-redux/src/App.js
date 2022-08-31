@@ -4,92 +4,158 @@ import LoginForm from './components/LoginForm'
 import BlogForm from './components/BlogForm'
 import Notification from './components/Notification'
 import Togglable from './components/Togglable'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import {
   initializeBlogs,
   createBlog,
   removeBlog,
   likeBlog,
 } from './reducers/blogReducer'
+import { login, setUser, setToken } from './reducers/userReducer'
+import { initializeUsers } from './reducers/usersReducer'
 import { setNotification } from './reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
+import { Routes, Route, Link } from 'react-router-dom'
+
+const Menu = () => {
+  const padding = {
+    paddingRight: 5,
+  }
+  return (
+    <div>
+      <Link style={padding} to="/blogs">
+        blogs
+      </Link>
+      <Link style={padding} to="/users">
+        users
+      </Link>
+    </div>
+  )
+}
+
+const Blogs = ({
+  blogFormRef,
+  newBlog,
+  copyBlogs,
+  updateLikes,
+  deleteBlog,
+  user,
+}) => {
+  return (
+    <div>
+      <Togglable buttonLabel="new blog" ref={blogFormRef}>
+        <BlogForm createBlog={newBlog} />
+      </Togglable>
+      {copyBlogs
+        .sort((a, b) => b.likes - a.likes)
+        .map((blog) => (
+          <div key={blog.id} className="blog">
+            <Blog
+              blog={blog}
+              handleLikes={() => updateLikes(blog)}
+              handleDelete={() => deleteBlog(blog)}
+              isUser={user.id === blog.user.id}
+            />
+          </div>
+        ))}
+    </div>
+  )
+}
+
+const Users = ({ users }) => {
+  if (users) {
+    return (
+      <div>
+        <h2>Users</h2>
+        <table>
+          <tbody>
+            <tr>
+              <th></th>
+              <th>blogs created</th>
+            </tr>
+            {users.map((u) => (
+              <tr key={u.id}>
+                <td>{u.username}</td>
+                <td>{u.blogs.length}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+}
 
 const App = () => {
   const dispatch = useDispatch()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [user, setUser] = useState(null)
 
   useEffect(() => {
     dispatch(initializeBlogs())
   }, [dispatch])
 
   useEffect(() => {
+    dispatch(initializeUsers())
+  }, [dispatch])
+
+  useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-    if (loggedUserJSON) {
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+    if (loggedUserJSON !== null) {
+      const userParsed = JSON.parse(loggedUserJSON)
+      dispatch(setUser(userParsed))
+      dispatch(setToken(userParsed.token))
     }
-  }, [])
+  }, [dispatch])
 
   const handleLogin = async (event) => {
     event.preventDefault()
-    try {
-      const user = await loginService.login({
+    dispatch(
+      login({
         username,
         password,
       })
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
-      blogService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
-    } catch (exception) {
-      dispatch(setNotification('wrong credentials'))
-    }
+    ).catch((error) => dispatch(setNotification('wrong credentials')))
+    setUsername('')
+    setPassword('')
   }
 
   const handleLogout = (event) => {
     event.preventDefault()
     window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
+    dispatch(setUser(null))
     setUsername('')
     setPassword('')
-    blogService.setToken(null)
+    dispatch(setToken(null))
   }
 
   const newBlog = async (blogObject) => {
-    try {
-      dispatch(createBlog(blogObject))
-      dispatch(
-        setNotification(
-          `a new blog ${blogObject.title} by ${blogObject.author} added`
+    dispatch(createBlog(blogObject))
+      .catch((exception) =>
+        dispatch(setNotification(exception.response.data.error))
+      )
+      .then(
+        dispatch(
+          setNotification(
+            `a new blog ${blogObject.title} by ${blogObject.author} added`
+          )
         )
       )
-
-      blogFormRef.current.toggleVisibility()
-    } catch (exception) {
-      dispatch(setNotification(exception.response.data.error))
-    }
+    blogFormRef.current.toggleVisibility()
   }
 
   const deleteBlog = async (blogObject) => {
     if (
       window.confirm(`Remove blog ${blogObject.title} by ${blogObject.author}?`)
     ) {
-      try {
-        dispatch(removeBlog(blogObject))
-        dispatch(
-          setNotification(
-            `blog ${blogObject.title} by ${blogObject.author} deleted`
-          )
-        )
-      } catch (exception) {
+      dispatch(removeBlog(blogObject)).catch((exception) =>
         dispatch(setNotification(exception.response.data.error))
-      }
+      )
+      dispatch(
+        setNotification(
+          `blog ${blogObject.title} by ${blogObject.author} deleted`
+        )
+      )
     }
   }
 
@@ -105,6 +171,8 @@ const App = () => {
   const errorMessage = useSelector((state) => state.notification)
   const blogs = useSelector((state) => state.blogs)
   const copyBlogs = [...blogs]
+  const user = useSelector((state) => state.user)
+  const users = useSelector((state) => state.users)
 
   if (user === null) {
     return (
@@ -123,24 +191,27 @@ const App = () => {
 
   return (
     <div>
+      <Menu />
       <Notification message={errorMessage} />
       <h2>blogs</h2>
       {user.name} logged in<button onClick={handleLogout}>logout</button>
-      <Togglable buttonLabel="new blog" ref={blogFormRef}>
-        <BlogForm createBlog={newBlog} />
-      </Togglable>
-      {copyBlogs
-        .sort((a, b) => b.likes - a.likes)
-        .map((blog) => (
-          <div key={blog.id} className="blog">
-            <Blog
-              blog={blog}
-              handleLikes={() => updateLikes(blog)}
-              handleDelete={() => deleteBlog(blog)}
-              isUser={user.id === blog.user.id}
+      <Routes>
+        <Route
+          path="/blogs"
+          element={
+            <Blogs
+              blogFormRef={blogFormRef}
+              newBlog={newBlog}
+              copyBlogs={copyBlogs}
+              updateLikes={updateLikes}
+              deleteBlog={deleteBlog}
+              user={user}
             />
-          </div>
-        ))}
+          }
+        />
+        <Route path="/" element={<div></div>} />
+        <Route path="/users" element={<Users users={users} />} />
+      </Routes>
     </div>
   )
 }
