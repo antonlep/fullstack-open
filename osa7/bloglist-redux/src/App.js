@@ -14,7 +14,7 @@ import { login, setUser, setToken } from './reducers/userReducer'
 import { initializeUsers } from './reducers/usersReducer'
 import { setNotification } from './reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
-import { Routes, Route, Link } from 'react-router-dom'
+import { Routes, Route, Link, useMatch } from 'react-router-dom'
 
 const Menu = () => {
   const padding = {
@@ -32,14 +32,14 @@ const Menu = () => {
   )
 }
 
-const Blogs = ({
-  blogFormRef,
-  newBlog,
-  copyBlogs,
-  updateLikes,
-  deleteBlog,
-  user,
-}) => {
+const Blogs = ({ blogFormRef, newBlog, copyBlogs }) => {
+  const blogStyle = {
+    paddingTop: 10,
+    paddingLeft: 2,
+    border: 'solid',
+    borderWidth: 1,
+    marginBottom: 5,
+  }
   return (
     <div>
       <Togglable buttonLabel="new blog" ref={blogFormRef}>
@@ -48,13 +48,8 @@ const Blogs = ({
       {copyBlogs
         .sort((a, b) => b.likes - a.likes)
         .map((blog) => (
-          <div key={blog.id} className="blog">
-            <Blog
-              blog={blog}
-              handleLikes={() => updateLikes(blog)}
-              handleDelete={() => deleteBlog(blog)}
-              isUser={user.id === blog.user.id}
-            />
+          <div key={blog.id} className="blog" style={blogStyle}>
+            <Link to={`/blogs/${blog.id}`}>{blog.title}</Link>
           </div>
         ))}
     </div>
@@ -74,12 +69,30 @@ const Users = ({ users }) => {
             </tr>
             {users.map((u) => (
               <tr key={u.id}>
-                <td>{u.username}</td>
+                <td>
+                  <Link to={`/users/${u.id}`}>{u.username}</Link>
+                </td>
                 <td>{u.blogs.length}</td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+    )
+  }
+}
+
+const User = ({ user }) => {
+  if (user) {
+    return (
+      <div>
+        <h2>{user.username}</h2>
+        <h3>added blogs</h3>
+        <ul>
+          {user.blogs.map((b) => (
+            <li key={b.id}>{b.title}</li>
+          ))}
+        </ul>
       </div>
     )
   }
@@ -173,6 +186,19 @@ const App = () => {
   const copyBlogs = [...blogs]
   const user = useSelector((state) => state.user)
   const users = useSelector((state) => state.users)
+  const match = useMatch('/users/:id')
+  const blogmatch = useMatch('/blogs/:id')
+
+  let user_match = null
+  if (users) {
+    user_match = match ? users.find((n) => n.id === match.params.id) : null
+  }
+  let blog_match = null
+  if (blogs) {
+    blog_match = blogmatch
+      ? blogs.find((n) => n.id === blogmatch.params.id)
+      : null
+  }
 
   if (user === null) {
     return (
@@ -188,7 +214,6 @@ const App = () => {
       </div>
     )
   }
-
   return (
     <div>
       <Menu />
@@ -211,6 +236,16 @@ const App = () => {
         />
         <Route path="/" element={<div></div>} />
         <Route path="/users" element={<Users users={users} />} />
+        <Route path="/users/:id" element={<User user={user_match} />} />
+        <Route
+          path="/blogs/:id"
+          element={
+            <Blog
+              blog={blog_match}
+              handleLikes={() => updateLikes(blog_match)}
+            />
+          }
+        />
       </Routes>
     </div>
   )
