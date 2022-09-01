@@ -16,7 +16,7 @@ import { setNotification } from './reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import { Routes, Route, Link, useMatch } from 'react-router-dom'
 
-const Menu = () => {
+const Menu = ({ user, handleLogout }) => {
   const padding = {
     paddingRight: 5,
   }
@@ -28,6 +28,7 @@ const Menu = () => {
       <Link style={padding} to="/users">
         users
       </Link>
+      {user.name} logged in<button onClick={handleLogout}>logout</button>
     </div>
   )
 }
@@ -216,10 +217,9 @@ const App = () => {
   }
   return (
     <div>
-      <Menu />
+      <Menu user={user} handleLogout={handleLogout} />
       <Notification message={errorMessage} />
       <h2>blogs</h2>
-      {user.name} logged in<button onClick={handleLogout}>logout</button>
       <Routes>
         <Route
           path="/blogs"

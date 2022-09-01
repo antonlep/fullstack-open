@@ -41,6 +41,26 @@ const like = async (blogObject) => {
   return response.data
 }
 
+const comment = async (blogObject, comment) => {
+  const updatedBlog = {
+    title: blogObject.title,
+    author: blogObject.author,
+    url: blogObject.url,
+    likes: blogObject.likes,
+    user: blogObject.user.id,
+    comments: blogObject.comments.concat(comment),
+  }
+  const config = {
+    headers: { Authorization: token },
+  }
+  const response = await axios.post(
+    baseUrl + '/' + blogObject.id + '/comments',
+    updatedBlog,
+    config
+  )
+  return response.data
+}
+
 const remove = async (blogObject) => {
   const config = {
     headers: { Authorization: token },
@@ -50,4 +70,4 @@ const remove = async (blogObject) => {
 }
 
 // eslint-disable-next-line import/no-anonymous-default-export
-export default { getAll, setToken, create, like, remove }
+export default { getAll, setToken, create, like, remove, comment }

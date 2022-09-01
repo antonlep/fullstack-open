@@ -13,6 +13,12 @@ const Blog = ({ blog, handleLikes }) => {
       likes {blog.likes} <button onClick={handleLikes}>like</button>
       <br></br>
       added by {blog.user.username}
+      <h3>comments</h3>
+      <ul>
+        {blog.comments.map((c, index) => (
+          <li key={index}>{c}</li>
+        ))}
+      </ul>
     </div>
   )
 }
