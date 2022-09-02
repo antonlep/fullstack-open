@@ -9,12 +9,26 @@ import {
   createBlog,
   removeBlog,
   likeBlog,
+  addComment,
 } from './reducers/blogReducer'
 import { login, setUser, setToken } from './reducers/userReducer'
 import { initializeUsers } from './reducers/usersReducer'
 import { setNotification } from './reducers/notificationReducer'
 import { useDispatch, useSelector } from 'react-redux'
 import { Routes, Route, Link, useMatch } from 'react-router-dom'
+import styled from 'styled-components'
+
+const Page = styled.div`
+  padding: 1em;
+  background: papayawhip;
+  font-size: 1.5 em;
+  color: brown;
+`
+
+const Navigation = styled.div`
+  background: palevioletred;
+  padding: 1em;
+`
 
 const Menu = ({ user, handleLogout }) => {
   const padding = {
@@ -158,6 +172,10 @@ const App = () => {
     blogFormRef.current.toggleVisibility()
   }
 
+  const createComment = async (blogObject, commentObject) => {
+    dispatch(addComment(blogObject, commentObject))
+  }
+
   const deleteBlog = async (blogObject) => {
     if (
       window.confirm(`Remove blog ${blogObject.title} by ${blogObject.author}?`)
@@ -203,51 +221,58 @@ const App = () => {
 
   if (user === null) {
     return (
-      <div>
-        <Notification message={errorMessage} />
-        <LoginForm
-          username={username}
-          password={password}
-          setUsername={setUsername}
-          setPassword={setPassword}
-          handleLogin={handleLogin}
-        />
-      </div>
+      <Page>
+        <div>
+          <Notification message={errorMessage} />
+          <LoginForm
+            username={username}
+            password={password}
+            setUsername={setUsername}
+            setPassword={setPassword}
+            handleLogin={handleLogin}
+          />
+        </div>
+      </Page>
     )
   }
   return (
-    <div>
-      <Menu user={user} handleLogout={handleLogout} />
-      <Notification message={errorMessage} />
-      <h2>blogs</h2>
-      <Routes>
-        <Route
-          path="/blogs"
-          element={
-            <Blogs
-              blogFormRef={blogFormRef}
-              newBlog={newBlog}
-              copyBlogs={copyBlogs}
-              updateLikes={updateLikes}
-              deleteBlog={deleteBlog}
-              user={user}
-            />
-          }
-        />
-        <Route path="/" element={<div></div>} />
-        <Route path="/users" element={<Users users={users} />} />
-        <Route path="/users/:id" element={<User user={user_match} />} />
-        <Route
-          path="/blogs/:id"
-          element={
-            <Blog
-              blog={blog_match}
-              handleLikes={() => updateLikes(blog_match)}
-            />
-          }
-        />
-      </Routes>
-    </div>
+    <Page>
+      <div>
+        <Navigation>
+          <Menu user={user} handleLogout={handleLogout} />
+        </Navigation>
+        <Notification message={errorMessage} />
+        <h2>blogs</h2>
+        <Routes>
+          <Route
+            path="/blogs"
+            element={
+              <Blogs
+                blogFormRef={blogFormRef}
+                newBlog={newBlog}
+                copyBlogs={copyBlogs}
+                updateLikes={updateLikes}
+                deleteBlog={deleteBlog}
+                user={user}
+              />
+            }
+          />
+          <Route path="/" element={<div></div>} />
+          <Route path="/users" element={<Users users={users} />} />
+          <Route path="/users/:id" element={<User user={user_match} />} />
+          <Route
+            path="/blogs/:id"
+            element={
+              <Blog
+                blog={blog_match}
+                handleLikes={() => updateLikes(blog_match)}
+                createComment={createComment}
+              />
+            }
+          />
+        </Routes>
+      </div>
+    </Page>
   )
 }
 

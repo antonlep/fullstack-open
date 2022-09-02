@@ -1,4 +1,6 @@
-const Blog = ({ blog, handleLikes }) => {
+import Comment from './Comment'
+
+const Blog = ({ blog, handleLikes, createComment }) => {
   if (!blog) {
     return null
   }
@@ -14,6 +16,7 @@ const Blog = ({ blog, handleLikes }) => {
       <br></br>
       added by {blog.user.username}
       <h3>comments</h3>
+      <Comment blogObject={blog} createComment={createComment} />
       <ul>
         {blog.comments.map((c, index) => (
           <li key={index}>{c}</li>
