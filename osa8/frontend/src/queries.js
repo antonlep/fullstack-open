@@ -11,6 +11,16 @@ export const ALL_AUTHORS = gql`
   }
 `
 
+export const CURRENT_USER = gql`
+  query {
+    me {
+      username
+      favouriteGenre
+      id
+    }
+  }
+`
+
 export const ALL_BOOKS = gql`
   query {
     allBooks {
