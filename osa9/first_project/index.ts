@@ -12,10 +12,10 @@ app.get('/hello', (_req, res) => {
 app.get('/bmi', (req, res) => {
     const { height, weight } = req.query;
     if (isNaN(Number(height)) || isNaN(Number(weight))) {
-        res.status(400).json({ error: 'malformatted input' });
+        return res.status(400).json({ error: 'malformatted input' });
     }
     const bmi = calculateBmi(Number(height), Number(weight));
-    res.send({ weight: weight, height: height, bmi: bmi });
+    return res.send({ weight: weight, height: height, bmi: bmi });
 });
 
 app.post('/exercises', jsonParser, (req, res) => {
