@@ -21,4 +21,20 @@ export interface PatientEntry {
 
 export type SensitivePatientEntry = Omit<PatientEntry, 'ssn'>;
 
-export type NewPatientEntry = Omit<PatientEntry, 'id'>;
+export type NewPatientEntry = Omit<Patient, 'id'>;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface Entry {
+}
+
+export interface Patient {
+    id: string;
+    name: string;
+    ssn: string;
+    occupation: string;
+    gender: Gender;
+    dateOfBirth: string;
+    entries: Entry[]
+}
+
+export type PublicPatient = Omit<Patient, 'ssn' | 'entries'>;
