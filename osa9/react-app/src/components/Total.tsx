@@ -1,16 +1,12 @@
 import React from 'react';
-
-interface CourseProps {
-    name: string;
-    exerciseCount: number;
-}
+import { CourseProps } from '../types';
 
 const Total = (props: { parts: Array<CourseProps> }) => {
     return (
-        <p>
+        <h2>
             Number of exercises{" "}
             {props.parts.reduce((carry, part) => carry + part.exerciseCount, 0)}
-        </p>
+        </h2>
     )
 }
 
