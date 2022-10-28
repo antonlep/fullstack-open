@@ -1,4 +1,4 @@
-import { NewPatientEntry, Gender } from './types'
+import { NewPatientEntry, Gender, NewEntry } from './types'
 
 const isString = (text: unknown): text is string => {
     return typeof text === 'string' || text instanceof String;
@@ -61,6 +61,67 @@ const toNewPatient = ({ name, dateOfBirth, ssn, gender, occupation }: Fields): N
         entries: []
     };
     return newPatient;
+};
+
+const checkProps = (props: EntryFields, fields: string[]): boolean => {
+    let check = true;
+    fields.forEach(element => {
+        if (!props.hasOwnProperty(element)) {
+            check = false;
+        }
+    });
+    return check
+}
+
+type EntryFields = { [key: string]: any };
+
+// export const toNewEntry = ({ description, date, specialist, type, diagnosisCodes, healthCheckRating, discharge, employerName, sickLeave }: EntryFields): NewEntry => {
+export const toNewEntry = (props: EntryFields): NewEntry => {
+    if (!props.type) {
+        throw new Error('Type missing');
+    }
+    if (props.type === 'HealthCheck') {
+        if (!checkProps(props, ['description', 'date', 'specialist', 'healthCheckRating'])) {
+            throw new Error('Required fields missing');
+        }
+        const newEntry: NewEntry = {
+            type: props.type,
+            description: props.description,
+            date: props.date,
+            specialist: props.specialist,
+            healthCheckRating: props.healthCheckRating,
+        }
+        return newEntry;
+    } else if (props.type === 'Hospital') {
+        if (!checkProps(props, ['description', 'date', 'specialist', 'discharge'])) {
+            throw new Error('Required fields missing');
+        }
+        const newEntry: NewEntry = {
+            type: props.type,
+            description: props.description,
+            date: props.date,
+            specialist: props.specialist,
+            discharge: {
+                date: props.discharge.date,
+                criteria: props.discharge.criteria
+            }
+        }
+        return newEntry;
+    } else if (props.type === 'OccupationalHealthcare') {
+        if (!checkProps(props, ['description', 'date', 'specialist', 'employerName'])) {
+            throw new Error('Required fields missing');
+        }
+        const newEntry: NewEntry = {
+            type: props.type,
+            description: props.description,
+            date: props.date,
+            specialist: props.specialist,
+            employerName: props.employerName
+        }
+        return newEntry;
+    } else {
+        throw new Error('Wrong type');
+    }
 };
 
 export default toNewPatient;
