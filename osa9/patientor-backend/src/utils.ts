@@ -90,6 +90,7 @@ export const toNewEntry = (props: EntryFields): NewEntry => {
             date: props.date,
             specialist: props.specialist,
             healthCheckRating: props.healthCheckRating,
+            diagnosisCodes: props.diagnosisCodes
         }
         return newEntry;
     } else if (props.type === 'Hospital') {
@@ -104,7 +105,8 @@ export const toNewEntry = (props: EntryFields): NewEntry => {
             discharge: {
                 date: props.discharge.date,
                 criteria: props.discharge.criteria
-            }
+            },
+            diagnosisCodes: props.diagnosisCodes
         }
         return newEntry;
     } else if (props.type === 'OccupationalHealthcare') {
@@ -116,7 +118,8 @@ export const toNewEntry = (props: EntryFields): NewEntry => {
             description: props.description,
             date: props.date,
             specialist: props.specialist,
-            employerName: props.employerName
+            employerName: props.employerName,
+            diagnosisCodes: props.diagnosisCodes
         }
         return newEntry;
     } else {
